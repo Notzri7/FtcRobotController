@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode.Mechanisms;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -34,6 +33,10 @@ public class MecanumDrive {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
 
         imu.initialize(new IMU.Parameters(RevOrientation));
+    }
+
+    public void resetYaw() {
+        imu.resetYaw();
     }
 
     public void drive(double forward, double strafe, double rotate) {

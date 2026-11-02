@@ -29,11 +29,31 @@ public class MainTeleOp extends OpMode {
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
 
+        if (Math.abs(forward) < 0.05) {
+            forward = 0.0;
+        }
+        if (Math.abs(strafe) < 0.05) {
+            strafe = 0.0;
+        }
+        if (Math.abs(rotate) < 0.05) {
+            rotate = 0.0;
+        }
+
+        if (gamepad1.right_bumper) {
+            forward *= 0.4;
+            strafe *= 0.4;
+            rotate *= 0.4;
+        }
+
+        if (gamepad1.options) {
+            drive.resetYaw();
+        }
+
         telemetry.addData("forward:", forward);
         telemetry.addData("strafe:", strafe);
         telemetry.addData("rotate:", rotate);
         telemetry.update();
 
-        drive.driveFieldRelative(forward,strafe,rotate);
+        drive.driveFieldRelative(forward, strafe, rotate);
     }
 }
