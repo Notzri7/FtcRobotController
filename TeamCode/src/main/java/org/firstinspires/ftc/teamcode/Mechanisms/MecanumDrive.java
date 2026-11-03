@@ -44,6 +44,12 @@ public class MecanumDrive {
         imu.resetYaw();
     }
 
+    public DcMotor[] getDriveMotors() {
+        return new DcMotor[] {
+                frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor
+        };
+    }
+
     public void drive(double forward, double strafe, double rotate) {
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
