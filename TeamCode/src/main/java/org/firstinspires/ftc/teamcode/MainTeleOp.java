@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -13,6 +15,8 @@ public class MainTeleOp extends OpMode {
     @Override
     public void init() {
         drive.init(hardwareMap);
+
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     }
 
     @Override
@@ -46,12 +50,13 @@ public class MainTeleOp extends OpMode {
         // Telemetry for Debugging & Tuning
         telemetry.addData("Actual Heading (deg)", drive.getYawDegrees());
         telemetry.addData("Target Heading (deg)", drive.getTargetHeadingDegrees());
-        telemetry.addData("Heading Error (deg)", drive.getCurrentHeadingErrorDegrees());
-        telemetry.addData("Live kP Gain", MecanumDrive.kP); // Shows current kP (useful if tuning via FTC Dashboard)
+        telemetry.addData("Heading Error (deg)", drive.getHeadingErrorDegrees());
+        //telemetry.addData("Live kP Gain", drive.kP); // Shows current kP (useful if tuning via FTC Dashboard)
         telemetry.addData("Forward / Strafe / Rotate", "%.2f / %.2f / %.2f", forward, strafe, rotate);
         telemetry.update();
 
-        drive.drive(forward, strafe, rotate); // This is robot centric drive
+        //drive.drive(forward, strafe, rotate); // This is robot centric drive
         //drive.driveFieldRelativeWithHeadingHold(forward, strafe, rotate);
+        drive.driveFieldRelative(forward, strafe, rotate);
     }
 }

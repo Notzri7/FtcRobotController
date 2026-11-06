@@ -4,16 +4,18 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.acmerobotics.dashboard.config.Config;
 
+
+@Config
 public class MecanumDrive {
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU imu;
     // Controls how aggressively the robot snaps back to its target heading.
     // Increase if it's sluggish to correct; decrease if it oscillates back and forth rapidly.
     // Making this 'public static' allows live tuning via FTC Dashboard.
-    public static double kP = 1.2;
+    public static double kP = 0.5;
     private double targetHeading = 0.0;
     private double currentHeadingError = 0.0;
     private boolean wasTurning = false;
@@ -27,9 +29,11 @@ public class MecanumDrive {
         frontRightMotor = hwMap.get(DcMotor.class, "front_right_motor");
         backRightMotor = hwMap.get(DcMotor.class, "back_right_motor");
 
-        // Reverse left motors so positive power moves the entire robot forward
-        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         // RUN_USING_ENCODER enables internal velocity regulation for consistent speed
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -48,9 +52,12 @@ public class MecanumDrive {
         // Define hub orientation relative to the robot chassis
         RevHubOrientationOnRobot RevOrientation = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
 
         imu.initialize(new IMU.Parameters(RevOrientation));
+
+        this.resetYaw();
+        this.targetHeading = getYawRadians();
     }
 
     /**
@@ -73,7 +80,7 @@ public class MecanumDrive {
         return Math.toDegrees(targetHeading);
     }
 
-    public double getCurrentHeadingErrorDegrees() {
+    public double getHeadingErrorDegrees() {
         return Math.toDegrees(currentHeadingError);
     }
     /**
@@ -118,13 +125,17 @@ public class MecanumDrive {
      * Field-Centric drive with Heading Hold.
      * Allows driving relative to the alliance wall while automatically locking heading when not turning.
      */
+
+    /**
     public void driveFieldRelativeWithHeadingHold(double forward, double strafe, double rotate) {
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double botHeading = getYawRadians();
+
+        double angularVelocity = imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
 
         // If the driver's rotation stick is pushed past 5%, manual turning takes over.
         // If stick drift causes the heading hold to disengage unintentionally,
         // increase this slightly (e.g., 0.08).
-        if (Math.abs(rotate) > 0.05) {
+        if (Math.abs(rotate) > 0.05 || Math.abs(angularVelocity) > 0.4) {
             targetHeading = botHeading;
             wasTurning = true;
             currentHeadingError = 0.0;
@@ -138,12 +149,33 @@ public class MecanumDrive {
             double error = targetHeading - botHeading;
             currentHeadingError = Math.atan2(Math.sin(error), Math.cos(error));
 
+            if (Math.abs(currentHeadingError) < Math.toRadians(1.0)) {
+                currentHeadingError = 0.0;
+            }
+
             rotate = kP * currentHeadingError;
 
             // Caps maximum automatic rotational correction at 50% power (-0.5 to 0.5).
             // Prevents the heading hold from aggressively overpowering your translation controls.
             rotate = Math.max(-0.5, Math.min(0.5, rotate));
         }
+
+        // Apply a 2D Rotation Matrix to transform field-relative commands
+        // into robot-relative coordinates
+        double cosAngle = Math.cos(-botHeading);
+        double sinAngle = Math.sin(-botHeading);
+
+        double rotStrafe = strafe * cosAngle - forward * sinAngle;
+        double rotForward = strafe * sinAngle + forward * cosAngle;
+
+        this.drive(rotForward, rotStrafe, rotate);
+    }
+}
+
+     */
+
+    public void driveFieldRelative(double forward, double strafe, double rotate) {
+        double botHeading = getYawRadians();
 
         // Apply a 2D Rotation Matrix to transform field-relative commands
         // into robot-relative coordinates
