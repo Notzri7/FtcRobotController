@@ -15,10 +15,10 @@ public class MecanumDrive {
     // Controls how aggressively the robot snaps back to its target heading.
     // Increase if it's sluggish to correct; decrease if it oscillates back and forth rapidly.
     // Making this 'public static' allows live tuning via FTC Dashboard.
-    public static double kP = 0.5;
-    private double targetHeading = 0.0;
-    private double currentHeadingError = 0.0;
-    private boolean wasTurning = false;
+    //public static double kP = 0.5;
+    //private double targetHeading = 0.0;
+    //private double currentHeadingError = 0.0;
+    //private boolean wasTurning = false;
     /**
      * Maps the configured drivetrain motors and IMU, applies motor directions and run modes,
      * and initializes the hub orientation used for yaw measurements.
@@ -57,7 +57,7 @@ public class MecanumDrive {
         imu.initialize(new IMU.Parameters(RevOrientation));
 
         this.resetYaw();
-        this.targetHeading = getYawRadians();
+        //this.targetHeading = getYawRadians();
     }
 
     /**
@@ -65,7 +65,7 @@ public class MecanumDrive {
      */
     public void resetYaw() {
         imu.resetYaw();
-        targetHeading = 0.0;
+        //this.targetHeading = 0.0;
     }
 
     public double getYawDegrees() {
@@ -76,13 +76,13 @@ public class MecanumDrive {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
 
-    public double getTargetHeadingDegrees() {
-        return Math.toDegrees(targetHeading);
-    }
+    //public double getTargetHeadingDegrees() {
+        //return Math.toDegrees(targetHeading);
+    //}
 
-    public double getHeadingErrorDegrees() {
-        return Math.toDegrees(currentHeadingError);
-    }
+    //public double getHeadingErrorDegrees() {
+    //    return Math.toDegrees(currentHeadingError);
+    //}
     /**
      * Provides an object-array accessor to the drive motors owned by this drivetrain.
      * Autonomous code can borrow these private hardware references without retrieving
