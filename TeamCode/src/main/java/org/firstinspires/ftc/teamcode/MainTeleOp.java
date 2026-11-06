@@ -61,7 +61,11 @@ public class MainTeleOp extends OpMode {
 
     }
     private double applyDeadband(double value, double threshold) {
-        if (Math.abs(value) < threshold) return 0.0;
-        return value;
+        if (Math.abs(value) < threshold) {
+            return 0.0;
+        }
+        double scaled = (Math.abs(value) - threshold) / (1.0 - threshold);
+        // Cubing the scaled input creates a true exponential response curve
+        return Math.pow(scaled, 2) * Math.signum(value);
     }
 }

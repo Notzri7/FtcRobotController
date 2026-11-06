@@ -108,17 +108,16 @@ public class MecanumDrive {
         double frontRightPower = forward - strafe - rotate;
         double backRightPower = forward + strafe - rotate;
 
-        double maxPower = 1.0;
+        double maxMagnitude = Math.max(1.0,
+                Math.max(Math.max(Math.abs(frontLeftPower), Math.abs(backLeftPower)),
+                        Math.max(Math.abs(frontRightPower), Math.abs(backRightPower))));
 
-        maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
-        maxPower = Math.max(maxPower, Math.abs(backLeftPower));
-        maxPower = Math.max(maxPower, Math.abs(frontRightPower));
-        maxPower = Math.max(maxPower, Math.abs(backRightPower));
+        double SpeedCap = 0.7;
 
-        frontLeftMotor.setPower(frontLeftPower/maxPower);
-        backLeftMotor.setPower(backLeftPower/maxPower);
-        frontRightMotor.setPower(frontRightPower/maxPower);
-        backRightMotor.setPower(backRightPower/maxPower);
+        frontLeftMotor.setPower((frontLeftPower  / maxMagnitude) * SpeedCap);
+        backLeftMotor.setPower((backLeftPower   / maxMagnitude) * SpeedCap);
+        frontRightMotor.setPower((frontRightPower / maxMagnitude) * SpeedCap);
+        backRightMotor.setPower((backRightPower  / maxMagnitude) * SpeedCap);
     }
 
     /**
