@@ -69,3 +69,4 @@ public class MainTeleOp extends OpMode {
         return Math.pow(scaled, 2) * Math.signum(value);
     }
 }
+

@@ -12,6 +12,7 @@ import com.acmerobotics.dashboard.config.Config;
 public class MecanumDrive {
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU imu;
+
     // Controls how aggressively the robot snaps back to its target heading.
     // Increase if it's sluggish to correct; decrease if it oscillates back and forth rapidly.
     // Making this 'public static' allows live tuning via FTC Dashboard.
@@ -98,7 +99,6 @@ public class MecanumDrive {
 
     /**
      * Use this method directly to test robot-centric driving.
-     *
      * Mixes forward, strafe, and rotation commands into individual mecanum wheel powers,
      * then scales them proportionally if any individual wheel exceeds magnitude 1.0.
      */
@@ -123,9 +123,7 @@ public class MecanumDrive {
     /**
      * Field-Centric drive with Heading Hold.
      * Allows driving relative to the alliance wall while automatically locking heading when not turning.
-     */
 
-    /**
     public void driveFieldRelativeWithHeadingHold(double forward, double strafe, double rotate) {
         double botHeading = getYawRadians();
 
