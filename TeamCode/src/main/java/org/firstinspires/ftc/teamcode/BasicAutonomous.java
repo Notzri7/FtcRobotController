@@ -14,6 +14,8 @@ public class BasicAutonomous extends LinearOpMode {
     // if robot drives too far or too short adjust WHEEL_DIAMETER_INCHES slightly
     //up if short, down if it overshoots
     //to account for foam tile slippage and tire wear
+
+    //GoBilda 5203 19:2:1 gear ratio
     static final double COUNTS_PER_MOTOR_REV = 537.7; //switch this depending on the motor gear ratio
     static final double DRIVE_GEAR_REDUCTION = 1.0; // set greater if any external gear ratio
 

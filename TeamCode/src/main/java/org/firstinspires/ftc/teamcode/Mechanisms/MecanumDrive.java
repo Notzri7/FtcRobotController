@@ -52,8 +52,8 @@ public class MecanumDrive {
 
         // Define hub orientation relative to the robot chassis
         RevHubOrientationOnRobot RevOrientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD);
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.DOWN);
 
         imu.initialize(new IMU.Parameters(RevOrientation));
 
@@ -112,7 +112,7 @@ public class MecanumDrive {
                 Math.max(Math.max(Math.abs(frontLeftPower), Math.abs(backLeftPower)),
                         Math.max(Math.abs(frontRightPower), Math.abs(backRightPower))));
 
-        double SpeedCap = 0.7;
+        double SpeedCap = 1.0;
 
         frontLeftMotor.setPower((frontLeftPower  / maxMagnitude) * SpeedCap);
         backLeftMotor.setPower((backLeftPower   / maxMagnitude) * SpeedCap);
