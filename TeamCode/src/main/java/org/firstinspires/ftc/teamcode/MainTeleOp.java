@@ -5,11 +5,15 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.Mechanisms.MecanumDrive;
+import org.firstinspires.ftc.teamcode.Mechanisms.Shooter;
 
 @TeleOp(name = "Mecanum Field Orientated", group = "TeleOp")
 public class MainTeleOp extends OpMode {
     MecanumDrive drive = new MecanumDrive();
+    Intake intake = new Intake();
+    Shooter shooter = new Shooter();
     double forward, strafe, rotate;
     private static final double DEADBAND = 0.05;   // ~5% stick = dead zone
     private static final double SLOW_MODE_SCALE = 0.4; // 40% speed in precision
@@ -17,6 +21,8 @@ public class MainTeleOp extends OpMode {
     @Override
     public void init() {
         drive.init(hardwareMap);
+        intake.init(hardwareMap);
+        shooter.init(hardwareMap);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     }
@@ -49,6 +55,9 @@ public class MainTeleOp extends OpMode {
         //drive.driveFieldRelativeWithHeadingHold(forward, strafe, rotate);
         //drive.drive(forward, strafe, rotate); // This is robot centric drive
         drive.driveFieldRelative(forward, strafe, rotate);
+
+        intake.runIntake(gamepad2.left_bumper, gamepad2.left_trigger > 0.1);
+        shooter.runShooter(gamepad2.y, gamepad2.a, gamepad2.right_bumper, intake);
 
         //telemetry.addData("Target Heading (deg)", drive.getTargetHeadingDegrees());
         //telemetry.addData("Heading Error (deg)", drive.getHeadingErrorDegrees());

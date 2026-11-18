@@ -20,7 +20,7 @@ public class BasicAutonomous extends LinearOpMode {
     static final double DRIVE_GEAR_REDUCTION = 1.0; // set greater if any external gear ratio
 
     //change this depending on the wheel diameter
-    static final double WHEEL_DIAMETER_INCHES = 3.77953;
+    static final double WHEEL_DIAMETER_INCHES = 3.937;
 
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * Math.PI);
@@ -43,7 +43,7 @@ public class BasicAutonomous extends LinearOpMode {
             // Speed: increase if too slow, decrease if wheels slip at launch
             // Inches: Change this to match exact inches from distance to parking zone
             // Timeout: Safety stop. if the robot takes longer than 4 seconds it forces movement to stop
-            encoderDrive(0.4, 24.0, 4.0);
+            encoderDrive(0.4, 10.0, 4.0);
         }
     }
 
