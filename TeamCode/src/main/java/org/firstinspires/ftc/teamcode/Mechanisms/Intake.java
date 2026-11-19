@@ -20,10 +20,10 @@ public class Intake {
         //change the power values to negative or reverse the motor direction in init.
         if (intakeButton) {
             intakeMotor.setPower(1.0); // Run intake forward
-            transferMotor.setPower(0.8); // Run transfer forward
+            transferMotor.setPower(0.5); // Run transfer forward
         } else if (ejectButton) {
             intakeMotor.setPower(-1.0); // Run intake backward
-            transferMotor.setPower(-0.8); // Run transfer backward
+            transferMotor.setPower(-0.5); // Run transfer backward
         } else {
             intakeMotor.setPower(0.0); // Stop intake
             transferMotor.setPower(0.0); // Stop transfer

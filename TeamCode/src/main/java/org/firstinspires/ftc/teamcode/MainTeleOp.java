@@ -56,8 +56,13 @@ public class MainTeleOp extends OpMode {
         //drive.drive(forward, strafe, rotate); // This is robot centric drive
         drive.driveFieldRelative(forward, strafe, rotate);
 
-        intake.runIntake(gamepad2.left_bumper, gamepad2.left_trigger > 0.1);
-        shooter.runShooter(gamepad2.y, gamepad2.a, gamepad2.right_bumper, intake);
+        intake.runIntake(gamepad1.left_bumper, gamepad1.left_trigger > 0.1);
+        // Gamepad 1 X = 2000 RPM preset | B = 2300 RPM preset | A = Stop Flywheel | Right Bumper = Feed Pollen
+        shooter.runShooter(gamepad1.x, gamepad1.b, gamepad1.a, gamepad1.right_bumper, intake);
+
+        // Add target and actual RPM to your telemetry screen to check performance live:
+        telemetry.addData("Target RPM", "%.0f", shooter.getTargetRPM());
+        telemetry.addData("Actual RPM", "%.0f", shooter.getCurrentRPM());
 
         //telemetry.addData("Target Heading (deg)", drive.getTargetHeadingDegrees());
         //telemetry.addData("Heading Error (deg)", drive.getHeadingErrorDegrees());
@@ -65,6 +70,7 @@ public class MainTeleOp extends OpMode {
 
         telemetry.addData("Yaw (deg)",        "%.1f", drive.getYawDegrees());
         telemetry.addData("Fwd / Strf / Rot", "%.2f / %.2f / %.2f", forward, strafe, rotate);
+        telemetry.addData("Battery Voltage",   "%.1fV", shooter.getBatteryVoltage());
         telemetry.addData("Slow Mode",        gamepad1.right_bumper ? "ON" : "off");
         telemetry.update();
 

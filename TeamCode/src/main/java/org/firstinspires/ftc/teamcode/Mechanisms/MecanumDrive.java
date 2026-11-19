@@ -16,7 +16,7 @@ public class MecanumDrive {
     // Controls how aggressively the robot snaps back to its target heading.
     // Increase if it's sluggish to correct; decrease if it oscillates back and forth rapidly.
     // Making this 'public static' allows live tuning via FTC Dashboard.
-    //public static double kP = 0.5;
+    //public static double kP = 0.1.5;
     //private double targetHeading = 0.0;
     //private double currentHeadingError = 0.0;
     //private boolean wasTurning = false;
