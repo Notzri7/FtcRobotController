@@ -13,10 +13,12 @@ public class MecanumDrive {
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU imu;
 
+    private static final double SpeedCap = 1.0;
+
     // Controls how aggressively the robot snaps back to its target heading.
     // Increase if it's sluggish to correct; decrease if it oscillates back and forth rapidly.
     // Making this 'public static' allows live tuning via FTC Dashboard.
-    //public static double kP = 0.1.5;
+    //public static double kP = 0.15;
     //private double targetHeading = 0.0;
     //private double currentHeadingError = 0.0;
     //private boolean wasTurning = false;
@@ -35,12 +37,12 @@ public class MecanumDrive {
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-
+        // Change RUN_USING_ENCODER to RUN_WITHOUT_ENCODER when encoder cables are unplugged
         // RUN_USING_ENCODER enables internal velocity regulation for consistent speed
-        frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // BRAKE mode stops the robot instantly when joysticks are released rather than coasting
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -97,6 +99,10 @@ public class MecanumDrive {
         };
     }
 
+    public void stop() {
+        drive(0.0, 0.0, 0.0);
+    }
+
     /**
      * Use this method directly to test robot-centric driving.
      * Mixes forward, strafe, and rotation commands into individual mecanum wheel powers,
@@ -111,8 +117,6 @@ public class MecanumDrive {
         double maxMagnitude = Math.max(1.0,
                 Math.max(Math.max(Math.abs(frontLeftPower), Math.abs(backLeftPower)),
                         Math.max(Math.abs(frontRightPower), Math.abs(backRightPower))));
-
-        double SpeedCap = 1.0;
 
         frontLeftMotor.setPower((frontLeftPower  / maxMagnitude) * SpeedCap);
         backLeftMotor.setPower((backLeftPower   / maxMagnitude) * SpeedCap);

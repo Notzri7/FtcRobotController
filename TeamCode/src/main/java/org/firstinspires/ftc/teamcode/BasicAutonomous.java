@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Mechanisms.MecanumDrive;
 
-@Autonomous(name = "Basic Autonomous", group = "Autonomous")
+//@Autonomous(name = "Basic Autonomous", group = "Autonomous")
 public class BasicAutonomous extends LinearOpMode {
 
 
@@ -43,7 +43,7 @@ public class BasicAutonomous extends LinearOpMode {
             // Speed: increase if too slow, decrease if wheels slip at launch
             // Inches: Change this to match exact inches from distance to parking zone
             // Timeout: Safety stop. if the robot takes longer than 4 seconds it forces movement to stop
-            encoderDrive(0.4, 10.0, 4.0);
+            encoderDrive(0.4, 24.0, 4.0);
         }
     }
 

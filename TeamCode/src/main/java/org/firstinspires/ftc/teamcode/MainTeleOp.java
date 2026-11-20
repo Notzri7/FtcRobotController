@@ -15,8 +15,15 @@ public class MainTeleOp extends OpMode {
     Intake intake = new Intake();
     Shooter shooter = new Shooter();
     double forward, strafe, rotate;
+
+    // Raise if joysticks drift on their own; lower if small stick pushes feel sluggish.
     private static final double DEADBAND = 0.05;   // ~5% stick = dead zone
+
+    // Speed multiplier (0.0 to 1.0) for the four drive wheels while holding right bumper.
     private static final double SLOW_MODE_SCALE = 0.4; // 40% speed in precision
+
+    // How far you must pull the left or right trigger (0.0 to 1.0) to activate eject or feed.
+    private static final double TRIGGER_THRESHOLD = 0.1;
 
     @Override
     public void init() {
@@ -53,12 +60,18 @@ public class MainTeleOp extends OpMode {
             drive.resetYaw();
         }
         //drive.driveFieldRelativeWithHeadingHold(forward, strafe, rotate);
-        //drive.drive(forward, strafe, rotate); // This is robot centric drive
-        drive.driveFieldRelative(forward, strafe, rotate);
+        drive.drive(forward, strafe, rotate); // This is robot centric drive
+        //drive.driveFieldRelative(forward, strafe, rotate);
 
-        intake.runIntake(gamepad1.left_bumper, gamepad1.left_trigger > 0.1);
-        // Gamepad 1 X = 2000 RPM preset | B = 2300 RPM preset | A = Stop Flywheel | Right Bumper = Feed Pollen
-        shooter.runShooter(gamepad1.x, gamepad1.b, gamepad1.a, gamepad1.right_bumper, intake);
+        boolean intakeOnlyBtn = gamepad1.left_bumper;
+        boolean transferOnlyBtn = gamepad1.y;
+        boolean bothBtn = gamepad1.dpad_up;
+        boolean ejectBtn = gamepad1.left_trigger > TRIGGER_THRESHOLD;
+        boolean feedBtn = gamepad1.right_trigger > TRIGGER_THRESHOLD;
+
+        intake.update(intakeOnlyBtn, transferOnlyBtn, bothBtn, ejectBtn, feedBtn);
+        // X = 2000 RPM flywheel preset, B = 2300 RPM preset, A = stop flywheel.
+        shooter.runShooter(gamepad1.x, gamepad1.b, gamepad1.a);
 
         // Add target and actual RPM to your telemetry screen to check performance live:
         telemetry.addData("Target RPM", "%.0f", shooter.getTargetRPM());
@@ -80,7 +93,7 @@ public class MainTeleOp extends OpMode {
             return 0.0;
         }
         double scaled = (Math.abs(value) - threshold) / (1.0 - threshold);
-        // Cubing the scaled input creates a true exponential response curve
+        // squaring the scaled input creates a true exponential response curve
         return Math.pow(scaled, 2) * Math.signum(value);
     }
 }
