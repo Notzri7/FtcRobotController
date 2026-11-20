@@ -63,13 +63,10 @@ public class MainTeleOp extends OpMode {
         drive.drive(forward, strafe, rotate); // This is robot centric drive
         //drive.driveFieldRelative(forward, strafe, rotate);
 
-        boolean intakeOnlyBtn = gamepad1.left_bumper;
-        boolean transferOnlyBtn = gamepad1.y;
-        boolean bothBtn = gamepad1.dpad_up;
-        boolean ejectBtn = gamepad1.left_trigger > TRIGGER_THRESHOLD;
-        boolean feedBtn = gamepad1.right_trigger > TRIGGER_THRESHOLD;
-
-        intake.update(intakeOnlyBtn, transferOnlyBtn, bothBtn, ejectBtn, feedBtn);
+        boolean intakeOnlyBtn = gamepad1.left_trigger > TRIGGER_THRESHOLD;
+        boolean transferOnlyBtn = gamepad1.right_trigger > TRIGGER_THRESHOLD;
+        boolean bothBtn = gamepad1.left_bumper;
+        intake.update(intakeOnlyBtn, transferOnlyBtn, bothBtn);
         // X = 2000 RPM flywheel preset, B = 2300 RPM preset, A = stop flywheel.
         shooter.runShooter(gamepad1.x, gamepad1.b, gamepad1.a);
 

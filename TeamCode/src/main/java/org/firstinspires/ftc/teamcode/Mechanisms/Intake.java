@@ -13,16 +13,10 @@ public class Intake {
     private static final double TRANSFER_TICKS_PER_REV = 28.0;
 
     // Transfer speed (RPM) when pushing game pieces into the shooter or running alone.
-    private static final double TRANSFER_FEED_RPM = 1500.0;
-
-    // Transfer speed (RPM) when intaking or ejecting game pieces.
-    private static final double TRANSFER_INTAKE_RPM = 750.0;
+    private static final double TRANSFER_FEED_RPM = 3200.0;
 
     // Power (-1.0 to 1.0) sent to the front intake roller when pulling game pieces in.
     private static final double INTAKE_COLLECT_POWER = 1.0;
-
-    // Power (-1.0 to 1.0) sent to the front intake roller when pushing game pieces out.
-    private static final double INTAKE_EJECT_POWER = -1.0;
 
     public void init(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.get(DcMotor.class, "intake");
@@ -46,17 +40,9 @@ public class Intake {
     public void update(
             boolean intakeOnly,
             boolean transferOnly,
-            boolean bothButton,
-            boolean ejectButton,
-            boolean feedButton
+            boolean bothButton
     ) {
-        if (ejectButton) {
-            intakeMotor.setPower(INTAKE_EJECT_POWER);
-            setTransferRPM(-TRANSFER_INTAKE_RPM);
-        } else if (feedButton) {
-            intakeMotor.setPower(0.0);
-            setTransferRPM(TRANSFER_FEED_RPM);
-        } else if (bothButton) {
+        if (bothButton) {
             intakeMotor.setPower(INTAKE_COLLECT_POWER);
             setTransferRPM(TRANSFER_FEED_RPM);
         } else if (intakeOnly) {
