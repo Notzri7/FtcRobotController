@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.Mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Mechanisms.Shooter;
 
-@TeleOp(name = "Mecanum Field Orientated", group = "TeleOp")
+@TeleOp(name = "Mecanum Drive", group = "TeleOp")
 public class MainTeleOp extends OpMode {
     MecanumDrive drive = new MecanumDrive();
     Intake intake = new Intake();
@@ -24,6 +24,10 @@ public class MainTeleOp extends OpMode {
 
     // How far you must pull the left or right trigger (0.0 to 1.0) to activate eject or feed.
     private static final double TRIGGER_THRESHOLD = 0.1;
+
+    // Set to true to start in Field-Centric drive, or false to start in Robot-Centric drive.
+    private boolean fieldCentric = true;
+    private boolean lastDpadUp = false;
 
     @Override
     public void init() {
@@ -51,14 +55,29 @@ public class MainTeleOp extends OpMode {
         rotate  = applyDeadband(rotate,  DEADBAND);
 
         // Precision / Slow Mode
-        if (gamepad1.right_bumper) {
+        if (gamepad1.y) {
             forward *= SLOW_MODE_SCALE;
             strafe  *= SLOW_MODE_SCALE;
         }
-
+/*
         if (gamepad1.back) {
             drive.resetYaw();
-        }
+            }
+            // D-Pad Up toggles once per press between Field-Centric and Robot-Centric driving.
+            boolean dpadUp = gamepad1.dpad_up;
+            if (dpadUp && !lastDpadUp) {
+                fieldCentric = !fieldCentric;
+            }
+            lastDpadUp = dpadUp;
+
+            if (fieldCentric) {
+                drive.driveFieldRelative(forward, strafe, rotate);
+            } else {
+                drive.drive(forward, strafe, rotate);
+            }
+
+
+        */
         //drive.driveFieldRelativeWithHeadingHold(forward, strafe, rotate);
         drive.drive(forward, strafe, rotate); // This is robot centric drive
         //drive.driveFieldRelative(forward, strafe, rotate);
@@ -66,8 +85,9 @@ public class MainTeleOp extends OpMode {
         boolean intakeOnlyBtn = gamepad1.left_trigger > TRIGGER_THRESHOLD;
         boolean transferOnlyBtn = gamepad1.right_trigger > TRIGGER_THRESHOLD;
         boolean bothBtn = gamepad1.left_bumper;
-        intake.update(intakeOnlyBtn, transferOnlyBtn, bothBtn);
-        // X = 2000 RPM flywheel preset, B = 2300 RPM preset, A = stop flywheel.
+        boolean ejectBtn = gamepad1.right_bumper;
+        intake.update(intakeOnlyBtn, transferOnlyBtn, bothBtn, ejectBtn);
+        // X = 3000 RPM flywheel preset, B = 3200 RPM preset, A = stop flywheel.
         shooter.runShooter(gamepad1.x, gamepad1.b, gamepad1.a);
 
         // Add target and actual RPM to your telemetry screen to check performance live:

@@ -14,7 +14,7 @@ public class EvenMoreSimpleAutonomous extends LinearOpMode {
     private static final double DRIVE_POWER = 0.25;
 
     // How long (in seconds) the robot drives forward; increase if short, decrease if too far.
-    private static final double DRIVE_DURATION_SEC = 0.35;
+    private static final double DRIVE_DURATION_SEC = 1.00;
 
     @Override
     public void runOpMode() {

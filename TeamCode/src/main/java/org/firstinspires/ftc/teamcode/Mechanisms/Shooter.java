@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.Mechanisms;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+@Config
 public class Shooter {
     private DcMotorEx shooterMotor;
     private VoltageSensor batteryVoltageSensor;
@@ -18,32 +20,30 @@ public class Shooter {
     // Highest allowed flywheel speed (RPM) for safety and motor limits.
     private static final double MAX_RPM = 5500.0;
 
-    // Motor no-load speed (RPM) used to estimate baseline speed control.
-    private static final double MOTOR_MAX_RPM = 6000.0;
+    // Base push (kF) in FTC Dashboard to keep the shooter flywheel motor near target RPM.
+    public static double kF = 11.7025;
 
-    // Proportional gain multiplier—raise slightly if flywheel stops short, lower if it overshoots.
-    private static final double P_TO_F_RATIO = 0.12;
+    // Correction push (kP) in FTC Dashboard; raise if flywheel stops short, lower if it overshoots.
+    public static double kP = 1.3;
 
-    // Integral gain multiplier—keep small or 0.0 to avoid overshoot or slow recovery.
-    private static final double I_TO_P_RATIO = 0.05;
+    //  Steady-error push (kI) in FTC Dashboard; keep small or 0.0 to avoid overshoot.
+    public static double kI = 0.0;
+
+    // Damping value (kD) in FTC Dashboard; keep at 0.0 unless shooter flywheel speed oscillates.
+    public static double kD = 0.0;
+
+    private double lastAppliedP = Double.NaN;
+    private double lastAppliedI = Double.NaN;
+    private double lastAppliedD = Double.NaN;
+    private double lastAppliedF = Double.NaN;
 
     // Default flywheel target speed (RPM) when the op mode starts.
-    private double targetRPM = 2000.0;
+    private double targetRPM = 3000.0;
     private boolean flywheelEnabled = false;
 
     public void init(HardwareMap hardwareMap) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter");
         shooterMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        // Tune velocity PIDF for a 1:1 6000 RPM (28 PPR) motor to reduce overshoot
-        double maxTicksPerSec = (MOTOR_MAX_RPM * COUNTS_PER_REV) / 60.0; // ~2800 ticks/sec
-        double fCoeff = 32767.0 / maxTicksPerSec;
-        double pCoeff = fCoeff * P_TO_F_RATIO;
-        double iCoeff = pCoeff * I_TO_P_RATIO;
-        shooterMotor.setPIDFCoefficients(
-                DcMotor.RunMode.RUN_USING_ENCODER,
-                new PIDFCoefficients(pCoeff, iCoeff, 0.0, fCoeff)
-        );
 
         // Use FLOAT so the heavy flywheel spins down naturally without shocking the gearbox
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -53,14 +53,15 @@ public class Shooter {
         if (!hardwareMap.voltageSensor.entrySet().isEmpty()) {
             batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
         }
+        syncPidIfchanged();
         stop();
     }
 
     public void runShooter(boolean preset2000Button, boolean preset2300Button, boolean stopButton) {
         if (preset2000Button) {
-            spinToRPM(2000.0);
+            spinToRPM(3000.0);
         } else if (preset2300Button) {
-            spinToRPM(2300.0);
+            spinToRPM(3200.0);
         }
 
         if (stopButton) {
@@ -80,11 +81,26 @@ public class Shooter {
 
     // Sends the target speed in encoder ticks per second to the flywheel motor.
     private void applyFlywheelOutput() {
+        syncPidIfchanged();
         if (flywheelEnabled) {
             double targetTicksPerSec = (targetRPM * COUNTS_PER_REV) / 60.0;
             shooterMotor.setVelocity(targetTicksPerSec);
         } else {
             shooterMotor.setVelocity(0.0);
+        }
+    }
+
+    // Pushes new kP, kI, kD, and kF values from FTC Dashboard to the shooter flywheel motor when edited.
+    private void syncPidIfchanged() {
+        if (kP != lastAppliedP || kI != lastAppliedI || kD != lastAppliedD || kF != lastAppliedF) {
+            shooterMotor.setPIDFCoefficients(
+                    DcMotor.RunMode.RUN_USING_ENCODER,
+                    new PIDFCoefficients(kP, kI, kD, kF)
+            );
+            lastAppliedP = kP;
+            lastAppliedI = kI;
+            lastAppliedD = kD;
+            lastAppliedF = kF;
         }
     }
 
