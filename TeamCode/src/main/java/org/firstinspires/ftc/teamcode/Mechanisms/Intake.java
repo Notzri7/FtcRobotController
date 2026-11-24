@@ -13,7 +13,7 @@ public class Intake {
     private static final double TRANSFER_TICKS_PER_REV = 28.0;
 
     // Transfer speed (RPM) when pushing game pieces into the shooter or running alone.
-    private static final double TRANSFER_FEED_RPM = 4500.0;
+    private static final double TRANSFER_FEED_POWER = 0.75;
 
     // Power (-1.0 to 1.0) sent to the front intake roller when pulling game pieces in.
     private static final double INTAKE_COLLECT_POWER = 1.0;
@@ -29,7 +29,7 @@ public class Intake {
         // Intake has NO encoder
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Transfer HAS an encoder
-        transferMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        transferMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         transferMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -39,22 +39,20 @@ public class Intake {
 
     public void update(
             boolean intakeOnly,
-            boolean transferOnly,
             boolean bothButton,
-            boolean ejectButton
+            boolean ejectButton,
+            boolean canFeedShooter
     ) {
-        if (bothButton) {
+        if (ejectButton) {
+            intakeMotor.setPower(-INTAKE_COLLECT_POWER);
+            transferMotor.setPower(-TRANSFER_FEED_POWER);
+        } else if (bothButton) {
             intakeMotor.setPower(INTAKE_COLLECT_POWER);
-            setTransferRPM(TRANSFER_FEED_RPM);
+            //  condition ? value_if_true : value_if_false
+            transferMotor.setPower(canFeedShooter ? TRANSFER_FEED_POWER : 0.0);
         } else if (intakeOnly) {
             intakeMotor.setPower(INTAKE_COLLECT_POWER);
             setTransferRPM(0.0);
-        } else if (transferOnly) {
-            intakeMotor.setPower(0.0);
-            setTransferRPM(TRANSFER_FEED_RPM);
-        } else if (ejectButton) {
-            intakeMotor.setPower(-INTAKE_COLLECT_POWER);
-            setTransferRPM(-TRANSFER_FEED_RPM);
         } else {
             stop();
         }
@@ -65,13 +63,8 @@ public class Intake {
         transferMotor.setVelocity(ticksPerSec);
     }
 
-    public double getTransferRPM() {
-        return (transferMotor.getVelocity() / TRANSFER_TICKS_PER_REV) * 60.0;
-    }
-
     public void stop() {
         intakeMotor.setPower(0.0);
-        transferMotor.setVelocity(0.0);
         transferMotor.setPower(0.0);
     }
 }

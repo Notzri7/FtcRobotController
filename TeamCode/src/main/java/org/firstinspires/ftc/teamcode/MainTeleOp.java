@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -36,10 +37,23 @@ public class MainTeleOp extends OpMode {
         shooter.init(hardwareMap);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        //  grabs all encoder velocities, analog inputs, and digital pins in a single ~3 ms
+        //  packet instead of 4 separate ~3 ms packets. This reduces the time spent waiting for
+        //  hardware reads and allows the loop() to run faster.
+        for (LynxModule lynxModule : hardwareMap.getAll(LynxModule.class)) {
+            lynxModule.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
     }
 
     @Override
     public void loop() {
+
+        //It is also done here so it does it every time the loop is ran not only when init is pressed
+        for (LynxModule lynxModule : hardwareMap.getAll(LynxModule.class)) {
+            lynxModule.clearBulkCache();
+        }
+
         // Read raw joystick inputs
         forward = -gamepad1.left_stick_y;
         strafe = gamepad1.left_stick_x;
@@ -83,10 +97,10 @@ public class MainTeleOp extends OpMode {
         //drive.driveFieldRelative(forward, strafe, rotate);
 
         boolean intakeOnlyBtn = gamepad1.left_trigger > TRIGGER_THRESHOLD;
-        boolean transferOnlyBtn = gamepad1.right_trigger > TRIGGER_THRESHOLD;
-        boolean bothBtn = gamepad1.left_bumper;
+        boolean bothBtn = gamepad1.right_trigger > TRIGGER_THRESHOLD;
         boolean ejectBtn = gamepad1.right_bumper;
-        intake.update(intakeOnlyBtn, transferOnlyBtn, bothBtn, ejectBtn);
+        boolean readyToShoot = shooter.isAtSpeed(75.0);
+        intake.update(intakeOnlyBtn, bothBtn, ejectBtn, readyToShoot);
         // X = 3000 RPM flywheel preset, B = 3200 RPM preset, A = stop flywheel.
         shooter.runShooter(gamepad1.x, gamepad1.b, gamepad1.a);
 

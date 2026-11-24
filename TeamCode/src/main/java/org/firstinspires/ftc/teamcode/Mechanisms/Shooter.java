@@ -20,30 +20,36 @@ public class Shooter {
     // Highest allowed flywheel speed (RPM) for safety and motor limits.
     private static final double MAX_RPM = 5500.0;
 
-    // Base push (kF) in FTC Dashboard to keep the shooter flywheel motor near target RPM.
-    public static double kF = 11.7025;
+    // to tune Temporarily set kP = 0 and bangBangThresholdRPM = 9999, then spin at 3000 RPM:
+    // - If Actual RPM is too low -> increase  kV slightly
+    // - If Actual RPM is too high  -> decrease kV slightly
+    public static double kV = 0.000167;
 
-    // Correction push (kP) in FTC Dashboard; raise if flywheel stops short, lower if it overshoots.
-    public static double kP = 1.3;
+    // minimum power to overcome bearing drag
+    // If wheel is sluggish to start or settles slightly below target at ALL speeds -> increase
+    // If wheel overshoots target at low speeds -> decrease (0.01 - 0.03)
+    public static double kS = 0.04;
 
-    //  Steady-error push (kI) in FTC Dashboard; keep small or 0.0 to avoid overshoot.
-    public static double kI = 0.0;
+    // Fine error correction when near target speed
+    // If Actual RPM hovers 20-50 RPM away from target -> increase slightly
+    // If Actual RPM vibrates/oscillates rapidly up and down -> decrease
+    public static double kP = 0.0008;
 
-    // Damping value (kD) in FTC Dashboard; keep at 0.0 unless shooter flywheel speed oscillates.
-    public static double kD = 0.0;
+    // If RPM drops further than this below target after a shot, slam 100% power
+    // If 2nd shot still drops short (recovery is too slow) -> lower
+    // If wheel surges/clicks randomly while idling with no ball -> raise
+    public static double bangBangThresholdRPM = 120.0;
 
-    private double lastAppliedP = Double.NaN;
-    private double lastAppliedI = Double.NaN;
-    private double lastAppliedD = Double.NaN;
-    private double lastAppliedF = Double.NaN;
+    // two driver preset speeds
+    public static double PRESET_1_RPM = 3000.0;
+    public static double PRESET_2_RPM = 3200.0;
 
-    // Default flywheel target speed (RPM) when the op mode starts.
-    private double targetRPM = 3000.0;
+    private double targetRPM = PRESET_1_RPM;
     private boolean flywheelEnabled = false;
 
     public void init(HardwareMap hardwareMap) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter");
-        shooterMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooterMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Use FLOAT so the heavy flywheel spins down naturally without shocking the gearbox
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -53,15 +59,14 @@ public class Shooter {
         if (!hardwareMap.voltageSensor.entrySet().isEmpty()) {
             batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
         }
-        syncPidIfchanged();
         stop();
     }
 
-    public void runShooter(boolean preset2000Button, boolean preset2300Button, boolean stopButton) {
-        if (preset2000Button) {
-            spinToRPM(3000.0);
-        } else if (preset2300Button) {
-            spinToRPM(3200.0);
+    public void runShooter(boolean lowerPresetButton, boolean HigherPresetButton, boolean stopButton) {
+        if (lowerPresetButton) {
+            spinToRPM(PRESET_1_RPM);
+        } else if (HigherPresetButton) {
+            spinToRPM(PRESET_2_RPM);
         }
 
         if (stopButton) {
@@ -81,32 +86,35 @@ public class Shooter {
 
     // Sends the target speed in encoder ticks per second to the flywheel motor.
     private void applyFlywheelOutput() {
-        syncPidIfchanged();
-        if (flywheelEnabled) {
-            double targetTicksPerSec = (targetRPM * COUNTS_PER_REV) / 60.0;
-            shooterMotor.setVelocity(targetTicksPerSec);
-        } else {
-            shooterMotor.setVelocity(0.0);
+        if (!flywheelEnabled || targetRPM == 0.0) {
+            shooterMotor.setPower(0.0);
+            return;
         }
-    }
 
-    // Pushes new kP, kI, kD, and kF values from FTC Dashboard to the shooter flywheel motor when edited.
-    private void syncPidIfchanged() {
-        if (kP != lastAppliedP || kI != lastAppliedI || kD != lastAppliedD || kF != lastAppliedF) {
-            shooterMotor.setPIDFCoefficients(
-                    DcMotor.RunMode.RUN_USING_ENCODER,
-                    new PIDFCoefficients(kP, kI, kD, kF)
-            );
-            lastAppliedP = kP;
-            lastAppliedI = kI;
-            lastAppliedD = kD;
-            lastAppliedF = kF;
+        double currentRPM = getCurrentRPM();
+        double error = targetRPM - currentRPM;
+
+        // This is where the bang bang controller activates
+        if (error > bangBangThresholdRPM) {
+            shooterMotor.setPower(1.0);
+            return;
         }
+
+        // Voltage normalization so 3000 RPM shoots the same at 13.5V and 11.8V
+        double voltage = getBatteryVoltage();
+        double voltageScale = (voltage > 8.0) ? (12.0/voltage) : 1.0;
+
+        double ffPower = (kS * Math.signum(targetRPM) + (kV * targetRPM));
+        double pPower = kP * error;
+
+        double totalPower = (ffPower + pPower) * voltageScale;
+        shooterMotor.setPower(Math.max(-1.0, Math.min(1.0, totalPower)));
+
     }
 
     // Checks whether the flywheel is within toleranceRPM of the target speed.
     public boolean isAtSpeed(double toleranceRPM) {
-        return Math.abs(getCurrentRPM() - targetRPM) <= toleranceRPM;
+        return flywheelEnabled && Math.abs(getCurrentRPM() - targetRPM) <= toleranceRPM;
     }
 
     // Turns off the flywheel and sets its speed command to zero.
