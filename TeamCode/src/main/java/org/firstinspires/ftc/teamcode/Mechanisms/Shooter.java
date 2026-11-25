@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 @Config
@@ -21,9 +20,9 @@ public class Shooter {
     private static final double MAX_RPM = 5500.0;
 
     // to tune Temporarily set kP = 0 and bangBangThresholdRPM = 9999, then spin at 3000 RPM:
-    // - If Actual RPM is too low -> increase  kV slightly
-    // - If Actual RPM is too high  -> decrease kV slightly
-    public static double kV = 0.000167;
+    // If Actual RPM is too low -> increase  kV slightly
+    // If Actual RPM is too high  -> decrease kV slightly
+    public static double kV = 0.000172;
 
     // minimum power to overcome bearing drag
     // If wheel is sluggish to start or settles slightly below target at ALL speeds -> increase
@@ -41,8 +40,8 @@ public class Shooter {
     public static double bangBangThresholdRPM = 120.0;
 
     // two driver preset speeds
-    public static double PRESET_1_RPM = 3000.0;
-    public static double PRESET_2_RPM = 3200.0;
+    public static double PRESET_1_RPM = 2700.0;
+    public static double PRESET_2_RPM = 3000.0;
 
     private double targetRPM = PRESET_1_RPM;
     private boolean flywheelEnabled = false;
@@ -120,7 +119,7 @@ public class Shooter {
     // Turns off the flywheel and sets its speed command to zero.
     public void stop() {
         flywheelEnabled = false;
-        shooterMotor.setVelocity(0.0);
+        shooterMotor.setPower(0.0);
     }
 
     // Returns the current target flywheel speed in RPM.
