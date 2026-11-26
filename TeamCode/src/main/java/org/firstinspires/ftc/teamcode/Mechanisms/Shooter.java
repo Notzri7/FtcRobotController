@@ -16,13 +16,14 @@ public class Shooter {
     // Change if a gear or pulley changes how many encoder counts equal one flywheel turn.
     private static final double COUNTS_PER_REV = 28.0;
 
+
     // Highest allowed flywheel speed (RPM) for safety and motor limits.
     private static final double MAX_RPM = 5500.0;
 
     // to tune Temporarily set kP = 0 and bangBangThresholdRPM = 9999, then spin at 3000 RPM:
     // If Actual RPM is too low -> increase  kV slightly
     // If Actual RPM is too high  -> decrease kV slightly
-    public static double kV = 0.000172;
+    public static double kV = 0.000080;
 
     // minimum power to overcome bearing drag
     // If wheel is sluggish to start or settles slightly below target at ALL speeds -> increase
@@ -40,8 +41,8 @@ public class Shooter {
     public static double bangBangThresholdRPM = 120.0;
 
     // two driver preset speeds
-    public static double PRESET_1_RPM = 2700.0;
-    public static double PRESET_2_RPM = 3000.0;
+    public static double PRESET_1_RPM = 2400.0;
+    public static double PRESET_2_RPM = 2700.0;
 
     private double targetRPM = PRESET_1_RPM;
     private boolean flywheelEnabled = false;
@@ -129,10 +130,11 @@ public class Shooter {
 
     // Returns the flywheel's actual measured speed in RPM from its encoder.
     public double getCurrentRPM() {
-        return (shooterMotor.getVelocity() / COUNTS_PER_REV) * 60.0;
+        return -(shooterMotor.getVelocity() / COUNTS_PER_REV) * 60.0;
     }
 
     // Returns the current robot battery voltage, or 0.0 if no voltage sensor is found.
     public double getBatteryVoltage() {
-        return batteryVoltageSensor != null ? batteryVoltageSensor.getVoltage() : 0.0;    }
+        return batteryVoltageSensor != null ? batteryVoltageSensor.getVoltage() : 0.0;
+    }
 }

@@ -101,7 +101,7 @@ public class MainTeleOp extends OpMode {
         boolean ejectBtn = gamepad1.right_bumper;
         boolean readyToShoot = shooter.isAtSpeed(75.0);
         intake.update(intakeOnlyBtn, bothBtn, ejectBtn, readyToShoot);
-        // X = 3000 RPM flywheel preset, B = 3200 RPM preset, A = stop flywheel.
+        // X = 2700 RPM flywheel preset, B = 3000 RPM preset, A = stop flywheel.
         shooter.runShooter(gamepad1.x, gamepad1.b, gamepad1.a);
 
         // Add target and actual RPM to your telemetry screen to check performance live:

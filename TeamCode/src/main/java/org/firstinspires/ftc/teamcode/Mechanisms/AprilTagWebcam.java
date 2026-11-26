@@ -13,6 +13,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class AprilTagWebcam {
     private AprilTagProcessor aprilTagProcessor;
@@ -35,5 +36,25 @@ public class AprilTagWebcam {
         VisionPortal.Builder builder = new VisionPortal.Builder();
         builder.setCamera(hwMap.get(WebcamName.class, "Webcam 1"));
         builder.setCameraResolution(new Size(640, 480));
+        builder.addProcessor(aprilTagProcessor);
+
+        visionPortal = builder.build();
+    }
+
+    public void update() {
+        detectedTags = aprilTagProcessor.getDetections();
+    }
+
+    public List<AprilTagDetection> getDetectedTags() {
+        return detectedTags;
+    }
+
+    public AprilTagDetection getTagBySpecificId(int id) {
+        for (AprilTagDetection detection : detectedTags) {
+            if (detection.id == id) {
+                return detection;
+            }
+        }
+        return null;
     }
 }
